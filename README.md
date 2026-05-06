@@ -1,21 +1,21 @@
 # BtoB Project Memory Template
 
-Entity-based memory vault template for BtoB client work, deal notes, delivery projects, renewals, and internal project management.
+BtoB の顧客対応、商談メモ、導入・納品プロジェクト、更新商談、社内プロジェクトを entity 別に管理するための memory vault テンプレートです。
 
-This repository is designed to be opened as an Obsidian vault and operated by coding agents such as Codex or Claude Code through repository-local skills. It includes only fictional sample data and `example.com` URLs. Do not add real customer data, secrets, personal information, contract amounts, or private URLs to a public fork.
+この repository は、Obsidian vault として開き、Codex や Claude Code などのエージェントが repository 内の skill に従って更新する前提で作っています。含まれるデータはすべて架空のサンプルで、URL も `example.com` だけを使っています。公開 fork に、実在顧客の情報、秘密情報、個人情報、契約金額、非公開 URL は追加しないでください。
 
-## What This Is
+## これは何か
 
-- `clients/`: client-specific `profile.md`, `sources.md`, `states/current.md`, and append-only events.
-- `internal/`: internal project-specific `profile.md`, `sources.md`, `states/current.md`, and append-only events.
-- `raw/`: source notes and meeting transcripts. Raw notes are internal memory and should not be copied into client-facing drafts.
-- `company/`: management-owned strategy, rules, and session context.
-- `.agentic/skills/`: canonical agent skills for save, digest, query, output, lint, and add flows.
-- `scripts/memory`: helper CLI for status, lint, smoke tests, prompt generation, publish, and sync.
+- `clients/`: 顧客別の `profile.md`、`sources.md`、`states/current.md`、追記専用 event。
+- `internal/`: 社内プロジェクト別の `profile.md`、`sources.md`、`states/current.md`、追記専用 event。
+- `raw/`: 議事録や長文メモの原本置き場。社内用 memory として扱い、顧客向け draft に直接コピーしません。
+- `company/`: マネジメントが管理する戦略、ルール、セッション指針。
+- `.agentic/skills/`: 保存、digest、query、output、lint、新規追加の正本 skill。
+- `scripts/memory`: status、lint、smoke test、prompt 生成、publish、sync の補助 CLI。
 
-Obsidian users may edit `clients/*/profile.md`, `clients/*/sources.md`, `clients/*/states/current.md`, `internal/*/profile.md`, `internal/*/sources.md`, `internal/*/states/current.md`, and `raw/*.md`. Events are append-only and should be created or corrected through the skills.
+Obsidian からは、`clients/*/profile.md`、`clients/*/sources.md`、`clients/*/states/current.md`、`internal/*/profile.md`、`internal/*/sources.md`、`internal/*/states/current.md`、`raw/*.md` を手動編集できます。`events/` は追記専用なので、作成や訂正は skill 経由で行います。
 
-## Quick Start
+## クイックスタート
 
 ```bash
 git clone https://github.com/tsutomutomizawa/btob-project-memory-template.git
@@ -24,30 +24,30 @@ cd btob-project-memory-template
 scripts/memory status --with-lint
 ```
 
-Python 3.10+ is required. On Windows, use Git Bash.
+Python 3.10 以上が必要です。Windows では Git Bash から実行してください。
 
-## Daily Loop
+## 日常の流れ
 
-1. Give the agent meeting notes, URLs, decisions, or correction requests.
-2. The agent runs `scripts/memory save ...` first to generate a skill prompt.
-3. `memory-save` creates a raw note and thin append-only event.
-4. `memory-digest` updates `profile.md` and `states/current.md` from pending events.
-5. `memory-query` answers read-only questions from the relevant entity context.
-6. `memory-output` drafts client-facing messages in chat, without saving output files.
-7. `scripts/memory lint` and `scripts/memory smoke` keep the vault healthy.
+1. 議事録、メモ、URL、決定事項、修正依頼をエージェントに渡す。
+2. エージェントがまず `scripts/memory save ...` を実行し、skill 用 prompt を生成する。
+3. `memory-save` が raw note と薄い追記専用 event を作る。
+4. `memory-digest` が pending event から `profile.md` と `states/current.md` を更新する。
+5. `memory-query` が対象 entity の文脈から読み取り専用で回答する。
+6. `memory-output` が顧客向け共有文や提案文をチャット上で draft として作る。output file は repository に保存しない。
+7. `scripts/memory lint` と `scripts/memory smoke` で vault の健全性を確認する。
 
-## Public-Repo Safety
+## 公開 repository としての安全性
 
-This template follows a clean-history public release approach:
+このテンプレートは、公開用に履歴を切り離した clean history の repository として作っています。
 
-- no original private git history;
-- no real client or internal data;
-- no real contact information;
-- no private Google Workspace URLs;
-- no `.env` files or local caches;
-- MIT license and contribution guidance included.
+- 元の private repository の git 履歴を含めない。
+- 実在顧客や社内プロジェクトのデータを含めない。
+- 実在の連絡先を含めない。
+- 非公開の Google Workspace URL を含めない。
+- `.env` や local cache を含めない。
+- MIT license、協力ガイド、セキュリティ方針を含める。
 
-Before publishing your own fork, run:
+自分の fork を公開する前に、以下を実行してください。
 
 ```bash
 scripts/memory privacy-scan
@@ -55,14 +55,14 @@ scripts/memory lint
 scripts/memory smoke
 ```
 
-## Included Samples
+## 含まれるサンプル
 
-- `clients/sample-saas-platform`: BtoB SaaS renewal and rollout sample.
-- `clients/sample-industrial-supplier`: industrial supplier quote and delivery sample.
-- `internal/sales-process-improvement`: sales note and quote approval process sample.
+- `clients/sample-saas-platform`: BtoB SaaS の更新商談と部門展開のサンプル。
+- `clients/sample-industrial-supplier`: 産業資材取引の見積・納期調整のサンプル。
+- `internal/sales-process-improvement`: 商談メモと見積承認フロー改善のサンプル。
 
-All samples are fictional and safe to replace.
+すべて架空のサンプルなので、自社用途に合わせて安全に置き換えてください。
 
-## License
+## ライセンス
 
-MIT. See [LICENSE](LICENSE).
+MIT。詳細は [LICENSE](LICENSE) を確認してください。

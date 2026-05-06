@@ -1,27 +1,27 @@
-# Security Policy
+# セキュリティ方針
 
-This public repository is a template and should contain only fictional sample data.
+この公開 repository はテンプレートであり、架空のサンプルデータだけを含める前提です。
 
-## Do Not Commit
+## commit してはいけないもの
 
-- real customer names or account records;
-- personal information;
-- secrets, tokens, `.env` files, or credentials;
-- private Google Workspace, CRM, BI, or ticket URLs;
-- contract amounts, price tables, or non-public commercial terms;
-- internal concerns that identify a real client or partner.
+- 実在顧客名、アカウント情報、取引記録。
+- 個人情報。
+- secrets、tokens、`.env`、認証情報。
+- 非公開の Google Workspace、CRM、BI、ticket URL。
+- 契約金額、価格表、非公開の商取引条件。
+- 実在の client や partner を特定できる社内懸念。
 
-## Checks
+## 確認コマンド
 
-Run these before publishing changes:
+変更を公開する前に、以下を実行してください。
 
 ```bash
 scripts/memory privacy-scan
 scripts/memory lint
 ```
 
-`privacy-scan` rejects unmasked email addresses and phone numbers. It is not a full data-loss-prevention system, so human review is still required.
+`privacy-scan` は未マスクの email address と phone number を検出して止めます。ただし完全な DLP ではないため、人間のレビューも必須です。
 
-## Reporting
+## 報告
 
-If you find sensitive data in this public template, open a private security advisory or contact the maintainer directly. Do not include the sensitive value in a public issue.
+この公開テンプレートに機微情報を見つけた場合は、public issue に値を書かず、private security advisory または maintainer への直接連絡で報告してください。

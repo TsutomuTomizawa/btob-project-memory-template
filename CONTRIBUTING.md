@@ -1,15 +1,15 @@
-# Contributing
+# コントリビューション
 
-Thanks for improving this template.
+このテンプレートの改善に協力してくれてありがとうございます。
 
-## Ground Rules
+## 基本ルール
 
-- Do not contribute real customer data, personal information, secrets, private URLs, contract amounts, or confidential internal notes.
-- Use fictional examples and reserved domains such as `example.com`.
-- Keep event files append-only. Use correction events instead of rewriting history.
-- Keep changes scoped and explain why a workflow or schema change is needed.
+- 実在顧客の情報、個人情報、秘密情報、非公開 URL、契約金額、機密の社内メモを含めないでください。
+- サンプルは架空の内容にし、URL は `example.com` などの予約ドメインを使ってください。
+- event file は追記専用として扱います。履歴を書き換えず、訂正は correction event として残してください。
+- 変更範囲はできるだけ小さくし、workflow や schema を変える場合は理由を説明してください。
 
-## Before Opening a Pull Request
+## Pull Request の前に
 
 ```bash
 scripts/memory privacy-scan
@@ -17,8 +17,8 @@ scripts/memory lint
 scripts/memory smoke
 ```
 
-If a command cannot be run, mention that in the PR.
+実行できなかったコマンドがある場合は、PR にその理由を書いてください。
 
-## Public Sample Data
+## 公開サンプルデータ
 
-Sample client and internal project data must stay generic. If an example starts to look like a real company, anonymize it further or move it to a private fork.
+sample client / internal project のデータは、汎用的で架空の内容にしてください。実在企業に見え始めた例は、さらに匿名化するか private fork に移してください。

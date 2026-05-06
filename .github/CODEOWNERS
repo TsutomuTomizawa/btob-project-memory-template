@@ -1,8 +1,8 @@
-# Repository maintenance owners.
+# Repository 保守オーナー。
 #
-# CODEOWNERS marks repository maintenance ownership for schema, skills, tools,
-# docs, hooks, templates, company policy, and shared generated views.
-# Replace @tsutomutomizawa with your organization or maintainer accounts in forks.
+# CODEOWNERS は schema、skills、tools、docs、hooks、templates、
+# company policy、shared generated views の保守責任範囲を示します。
+# fork する場合は @tsutomutomizawa を自分の organization または maintainer account に置き換えてください。
 
 /.agentic/ @tsutomutomizawa
 /.github/ @tsutomutomizawa

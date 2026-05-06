@@ -1,4 +1,4 @@
-# Review Checklist
+# レビューチェックリスト
 
 - [ ] 対象 entity は正しいか。
 - [ ] `events/` は追記専用として扱われ、既存 event 本文や immutable frontmatter を直接変更していないか。
