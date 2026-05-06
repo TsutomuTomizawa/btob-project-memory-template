@@ -25,3 +25,5 @@ scripts/memory lint
 ## 報告
 
 この公開テンプレートに機微情報を見つけた場合は、public issue に値を書かず、private security advisory または maintainer への直接連絡で報告してください。
+
+公開 issue で報告する場合も、該当する秘密情報や個人情報の値は書かないでください。Pull Request での修正提案は原則として受け付けていません。

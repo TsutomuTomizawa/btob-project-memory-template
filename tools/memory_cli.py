@@ -11,7 +11,6 @@ import os
 import re
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 import memory_llm_qa
@@ -22,7 +21,6 @@ import memory_workflow_smoke
 
 ROOT = memory_lint.ROOT
 MAIN_BRANCH = "main"
-PUBLISH_BRANCH_PREFIX = "codex/memory-publish"
 PUBLISH_WAIT_TIMEOUT_SECONDS = 900
 PUBLISH_WAIT_INTERVAL_SECONDS = 10
 ROLE_REGISTRY_PATH = ROOT / ".memory-roles.json"
@@ -103,14 +101,6 @@ def run_git_step(args: list[str], label: str) -> int:
     return run_command(["git", *args]).returncode
 
 
-def run_git_step_capture(args: list[str], label: str) -> subprocess.CompletedProcess[str]:
-    print(f"[memory] {label}: git {' '.join(args)}", flush=True)
-    result = run_command(["git", *args], capture=True)
-    if result.stdout:
-        print(result.stdout.rstrip())
-    return result
-
-
 def ensure_not_git_operation_in_progress() -> bool:
     git_dir = git_output(["rev-parse", "--git-dir"])
     if not git_dir:
@@ -133,85 +123,6 @@ def ensure_not_git_operation_in_progress() -> bool:
             print(f"- {marker}", file=sys.stderr)
         return False
     return True
-
-
-def sanitize_branch_part(value: str) -> str:
-    normalized = re.sub(r"[^A-Za-z0-9._-]+", "-", value.lower()).strip("-._")
-    return normalized[:40] or "memory-update"
-
-
-def branch_ref_exists(branch: str) -> bool:
-    return git_success(["show-ref", "--verify", f"refs/heads/{branch}"])
-
-
-def origin_branch_ref_exists(branch: str) -> bool:
-    return git_success(["show-ref", "--verify", f"refs/remotes/origin/{branch}"])
-
-
-def validate_branch_name(branch: str) -> bool:
-    result = run_command(["git", "check-ref-format", "--branch", branch], capture=True)
-    if result.returncode != 0:
-        print(f"[memory] invalid branch name: {branch}", file=sys.stderr)
-        if result.stdout:
-            print(result.stdout.rstrip(), file=sys.stderr)
-        return False
-    return True
-
-
-def generated_publish_branch(message: str) -> str:
-    stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
-    base = f"{PUBLISH_BRANCH_PREFIX}-{stamp}-{sanitize_branch_part(message)}"
-    branch = base
-    suffix = 2
-    while branch_ref_exists(branch) or origin_branch_ref_exists(branch):
-        branch = f"{base}-{suffix}"
-        suffix += 1
-    return branch
-
-
-def commits_ahead_of_origin_main() -> int:
-    count = git_output(["rev-list", "--count", "origin/main..HEAD"])
-    try:
-        return int(count)
-    except ValueError:
-        return 0
-
-
-def prepare_publish_branch_from_main(branch: str) -> int:
-    if not validate_branch_name(branch):
-        return 2
-    if run_git_step(["fetch", "origin"], "publish fetch") != 0:
-        return 1
-    if commits_ahead_of_origin_main():
-        print(
-            "[memory] publish: local main に origin/main へ未反映の commit があります。"
-            " main 上の commit を直接扱わず、開発者に確認してください。",
-            file=sys.stderr,
-        )
-        return 1
-
-    had_changes = worktree_is_dirty()
-    stashed = False
-    if had_changes:
-        stash_message = f"memory publish {dt.datetime.now().isoformat(timespec='seconds')}"
-        result = run_git_step_capture(["stash", "push", "--include-untracked", "-m", stash_message], "publish stash")
-        if result.returncode != 0:
-            return 1
-        stashed = "No local changes" not in (result.stdout or "")
-
-    checkout_result = run_git_step(["checkout", "-b", branch, "origin/main"], "publish branch")
-    if checkout_result != 0:
-        if stashed:
-            run_git_step(["stash", "pop"], "publish restore")
-        return checkout_result
-
-    if stashed and run_git_step(["stash", "pop"], "publish restore") != 0:
-        print(
-            "[memory] publish: stash 復元で conflict しました。解消後にもう一度 publish してください。",
-            file=sys.stderr,
-        )
-        return 1
-    return 0
 
 
 def changed_files_for_mode(mode: str) -> list[str]:
@@ -869,26 +780,10 @@ def command_publish(args: argparse.Namespace) -> int:
         print("[memory] publish: detached HEAD では実行できません。branch を checkout してください。", file=sys.stderr)
         return 1
 
-    dirty_before = worktree_is_dirty()
-    if branch == MAIN_BRANCH:
-        target_branch = args.branch or generated_publish_branch(message)
-        if not dirty_before and not commits_ahead_of_origin_main():
-            print("[memory] publish: 共有する変更がありません。")
-            return 0
-        prepared = prepare_publish_branch_from_main(target_branch)
-        if prepared != 0:
-            return prepared
-        branch = current_git_branch()
-    elif args.branch and args.branch != branch:
-        print(
-            f"[memory] publish: 現在の branch は {branch} です。--branch は main 上で作業 branch を作る時だけ使ってください。",
-            file=sys.stderr,
-        )
-        return 2
-
-    if branch == MAIN_BRANCH:
-        print("[memory] publish: main へ直接 push しません。作業 branch に移動してから実行してください。", file=sys.stderr)
-        return 1
+    if args.branch:
+        print("[memory] publish: この公開テンプレートでは --branch は使いません。現在の branch を commit / push します。")
+    if not args.no_wait:
+        print("[memory] publish: 自動 PR / auto-merge は使いません。push 後は GitHub Actions の結果を確認してください。")
 
     if worktree_is_dirty():
         if run_git_step(["add", "-A"], "publish stage") != 0:
@@ -899,72 +794,17 @@ def command_publish(args: argparse.Namespace) -> int:
         else:
             print("[memory] publish: stage 対象の変更がありません。")
     else:
+        if not git_lines(["log", "--oneline", f"origin/{branch}..{branch}"]):
+            print("[memory] publish: 共有する変更がありません。")
+            return 0
         print("[memory] publish: file 変更はありません。既存 commit を push します。")
-
-    base_main_sha = git_output(["rev-parse", "origin/main"])
 
     if run_git_step(["push", "-u", "origin", branch], "publish push") != 0:
         return 1
 
     print()
-    if args.no_wait:
-        print("[memory] publish: push 完了。GitHub Actions が main 向け PR を自動作成し、CI を実行します。")
-        print("[memory] publish: --no-wait のためここで終了します。merge 後は `scripts/memory sync` で main に戻って最新化してください。")
-        return 0
-
-    return wait_for_publish_completion(
-        branch=branch,
-        base_main_sha=base_main_sha,
-        timeout_seconds=args.wait_timeout,
-        interval_seconds=args.wait_interval,
-    )
-
-
-def wait_for_publish_completion(branch: str, base_main_sha: str, timeout_seconds: int, interval_seconds: int) -> int:
-    if timeout_seconds < 0:
-        print("[memory] publish: --wait-timeout は 0 以上にしてください。", file=sys.stderr)
-        return 2
-    if interval_seconds <= 0:
-        print("[memory] publish: --wait-interval は 1 以上にしてください。", file=sys.stderr)
-        return 2
-
-    print("[memory] publish: push 完了。GitHub Actions の PR 作成、CI、auto-merge 完了を待ちます。")
-    print("[memory] publish: remote branch が削除されたら merge 済みとみなし、`scripts/memory sync` 相当で main に戻します。")
-
-    started_at = time.monotonic()
-    while True:
-        result = run_git_step_capture(["fetch", "origin", "--prune"], "publish wait fetch")
-        if result.returncode != 0:
-            return 1
-
-        if not origin_branch_ref_exists(branch):
-            current_main_sha = git_output(["rev-parse", "origin/main"])
-            if base_main_sha and current_main_sha == base_main_sha:
-                print(
-                    "[memory] publish: remote branch は削除されましたが origin/main が更新されていません。"
-                    " merge されたか GitHub で確認してください。",
-                    file=sys.stderr,
-                )
-                return 1
-
-            print(f"[memory] publish: {branch} の remote branch 削除を確認しました。main を最新化します。")
-            return command_sync(argparse.Namespace(prune_gone=False))
-
-        elapsed = time.monotonic() - started_at
-        if elapsed >= timeout_seconds:
-            print(
-                f"[memory] publish: {timeout_seconds} 秒待ちましたが merge 完了を確認できませんでした。"
-                " GitHub Actions / PR を確認してください。merge 後に `scripts/memory sync` を実行できます。",
-                file=sys.stderr,
-            )
-            return 1
-
-        sleep_seconds = min(interval_seconds, max(1, int(timeout_seconds - elapsed)))
-        print(
-            f"[memory] publish: {branch} はまだ remote にあります。"
-            f" {sleep_seconds} 秒後に再確認します。"
-        )
-        time.sleep(sleep_seconds)
+    print("[memory] publish: push 完了。GitHub Actions の結果を確認してください。")
+    return 0
 
 
 def branch_tracking_remote(branch: str) -> str | None:
@@ -1475,22 +1315,22 @@ def build_parser() -> argparse.ArgumentParser:
 
     memory_llm_qa.add_parser(subparsers)
 
-    publish_parser = subparsers.add_parser("publish", help="現在の変更を作業ブランチで commit して push します")
-    publish_parser.add_argument("--branch", help="Branch name to create when publishing from main")
-    publish_parser.add_argument("--no-wait", action="store_true", help="Push only; do not wait for PR auto-merge and sync")
+    publish_parser = subparsers.add_parser("publish", help="現在の branch で変更を commit して push します")
+    publish_parser.add_argument("--branch", help="互換用。公開テンプレートでは使用せず、現在の branch を push します")
+    publish_parser.add_argument("--no-wait", action="store_true", help="互換用。公開テンプレートでは常に待機しません")
     publish_parser.add_argument(
         "--wait-timeout",
         type=int,
         default=PUBLISH_WAIT_TIMEOUT_SECONDS,
-        help=f"Seconds to wait for auto-merge before failing (default: {PUBLISH_WAIT_TIMEOUT_SECONDS})",
+        help=f"互換用。公開テンプレートでは自動 merge 待機を行いません (default: {PUBLISH_WAIT_TIMEOUT_SECONDS})",
     )
     publish_parser.add_argument(
         "--wait-interval",
         type=int,
         default=PUBLISH_WAIT_INTERVAL_SECONDS,
-        help=f"Seconds between merge checks (default: {PUBLISH_WAIT_INTERVAL_SECONDS})",
+        help=f"互換用。公開テンプレートでは自動 merge 待機を行いません (default: {PUBLISH_WAIT_INTERVAL_SECONDS})",
     )
-    publish_parser.add_argument("message", nargs="*", help="コミットメッセージ。リポジトリの commit と PR では日本語を使ってください。")
+    publish_parser.add_argument("message", nargs="*", help="コミットメッセージ。日本語を使ってください。")
     publish_parser.set_defaults(func=command_publish)
 
     sync_parser = subparsers.add_parser("sync", help="Return to main, fetch latest changes, and clean merged work branches")

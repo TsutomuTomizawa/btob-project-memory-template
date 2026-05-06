@@ -11,7 +11,7 @@
 7. 月次で振り返る場合は `scripts/memory review ...` で `monthly-review` event を作り、来月へ持ち越すものだけ `states/current.md` に残す。
 8. 安全チェック用の skill で vault を確認する。
 
-Obsidian は基本的に閲覧・確認用ですが、client / internal 配下の `profile.md`、`sources.md`、`states/current.md` と top-level `raw/` は手動編集できます。client / internal markdown や event が staged された commit では、`scripts/memory lint --fix --staged` が機械的な形式不備を補正し、既存 event 改ざんを止めます。full vault の意味検査は GitHub Actions の必須 CI で確認します。
+Obsidian は基本的に閲覧・確認用ですが、client / internal 配下の `profile.md`、`sources.md`、`states/current.md` と top-level `raw/` は手動編集できます。client / internal markdown や event が staged された commit では、`scripts/memory lint --fix --staged` が機械的な形式不備を補正し、既存 event 改ざんを止めます。full vault の意味検査は GitHub Actions でも確認します。
 
 ## 補助 CLI
 
@@ -19,7 +19,7 @@ Obsidian は基本的に閲覧・確認用ですが、client / internal 配下�
 
 CLI は `memory-save` や `memory-digest` の代わりに判断しません。保存・digest・月次総括系の更新では、ユーザーが CLI と明示していなくても、まず `scripts/memory save`、`scripts/memory digest`、または `scripts/memory review` で agent 向け prompt を生成し、その prompt と該当 skill 経由で更新します。詳細は `docs/CLI.md` を参照してください。
 
-ユーザーが「pushして」と依頼した場合、エージェントは通常 `scripts/memory publish "短い日本語のコミットメッセージ"` を使います。コミットメッセージ、PR タイトル、PR 本文は日本語で作成します。`main` 上にいる場合も direct push せず、作業ブランチを作って commit / push し、PR/CI/auto-merge 完了後に main へ戻って最新化します。ユーザーが「最新化して」と依頼した場合は、未保存変更がないことを確認してから `scripts/memory sync` を使います。
+ユーザーが「pushして」と依頼した場合、エージェントは通常 `scripts/memory publish "短い日本語のコミットメッセージ"` を使います。公開テンプレートでは自動 PR / auto-merge を使わず、maintainer が現在の branch を commit / push します。ユーザーが「最新化して」と依頼した場合は、未保存変更がないことを確認してから `scripts/memory sync` を使います。
 
 ## 初回セットアップ
 
@@ -31,7 +31,7 @@ CLI は `memory-save` や `memory-digest` の代わりに判断しません。�
 
 これにより履歴保存前に `scripts/memory privacy-scan --staged` と `scripts/memory role-guard` が走ります。Python syntax check と `scripts/memory lint --fix --staged` は、関連する staged path がある場合だけ走ります。commit-msg hook は日本語ではないコミットメッセージを止めます。pre-push hook は置きません。
 
-作業ブランチへの push と main 向け PR では GitHub Actions が `scripts/memory commit-language`、`scripts/memory py-compile`、`scripts/memory privacy-scan`、`scripts/memory lint`、`scripts/memory smoke`、diff whitespace check を実行し、PR ではタイトルと本文も日本語か確認します。さらに trusted workflow が `.memory-roles.json` と push actor を見て `memory-role-guard` status を付けます。
+main への push では GitHub Actions が `scripts/memory commit-language`、`scripts/memory py-compile`、`scripts/memory privacy-scan`、`scripts/memory lint`、`scripts/memory smoke`、diff whitespace check を実行します。PR は原則受け付けませんが、例外的に扱う場合も同じ CI が走ります。
 
 仕組み側の改修後に保存・digest・hook 周りまで確認したい場合は、ローカルで `scripts/memory qa` を任意実行します。これは CI には入れません。
 
@@ -45,13 +45,18 @@ CLI は `memory-save` や `memory-digest` の代わりに判断しません。�
 
 ## GitHub 接続
 
-GitHub 側では以下を設定します。
+この公開テンプレート repository では、Issue は受け付けます。Pull Request は原則として受け付けず、必要な場合も事前に Issue で方針を確認してから maintainer が判断します。
 
-- `main` への direct push を禁止し、PR 経由で取り込む。
-- GitHub Actions / commit status の `memory-vault-ci` と `memory-role-guard` を必須 check にする。
+- GitHub repository description は日本語にする。
+- Issues は有効にする。
+- Fork は推奨しない。GitHub 設定で無効化できる場合は無効にする。個人アカウント所有の public repository では、GitHub の仕様上 fork を無効化できない場合がある。
+- Wiki / Projects は無効にする。
+- Secret scanning と push protection を有効にする。
+- Maintainer 以外に write 権限を付けない。
+- `main` は maintainer が直接更新してよいが、push 前に `scripts/memory privacy-scan`、`scripts/memory lint`、必要に応じて `scripts/memory smoke` を実行する。
+- 外部 contribution はまず Issue で受け、PR 取り込みは例外扱いにする。
 - CODEOWNERS は責任範囲を示す目印として残すが、GitHub 上の必須 review 条件にはしない。
-- 作業ブランチ push 後の PR 自動作成には、repository secret `AUTO_PR_TOKEN` を設定する。
-- GitHub の native auto-merge を有効化できる場合は有効化し、作業ブランチ push 後に自動作成された PR が CI 通過後に merge されるようにする。
+- 自動 PR 作成用の repository secret は設定しない。
 
 ## ルーティング確認
 

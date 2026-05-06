@@ -11,4 +11,4 @@
 - [ ] `sources.md` の URL と context が妥当か。
 - [ ] raw note が複数 entity を跨ぐ場合、raw 原本を複製せず各 event から参照しているか。
 - [ ] 月次総括は `event_type: review` の `monthly-review` event で残し、月別 state file や output file を作っていないか。
-- [ ] commit message、PR title、PR body が日本語になっているか。
+- [ ] commit message が日本語になっているか。例外的に PR を扱う場合は PR title / body も日本語になっているか。

@@ -16,7 +16,7 @@
 
 ## コラボレーション
 
-- GitHub + PR workflow を前提にします。
+- GitHub Issues と push 後の GitHub Actions 確認を前提にします。Pull Request は原則として受け付けません。
 - v1 では全メンバーが全クライアント・全社内プロジェクトを読める前提です。
 - ローカル hook は `HEAD` の `.memory-roles.json` と Git の `user.name` / `user.email` を見ます。通常メンバーは `member` とし、更新範囲は `clients/`、`internal/`、`inbox/`、`raw/` に限定します。
 - skill、tool、docs、templates、hook、`company/` など repository 運用側の変更は `developer` または `admin` role で行います。

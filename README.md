@@ -2,7 +2,9 @@
 
 BtoB の顧客対応、商談メモ、導入・納品プロジェクト、更新商談、社内プロジェクトを entity 別に管理するための memory vault テンプレートです。
 
-この repository は、Obsidian vault として開き、Codex や Claude Code などのエージェントが repository 内の skill に従って更新する前提で作っています。含まれるデータはすべて架空のサンプルで、URL も `example.com` だけを使っています。公開 fork に、実在顧客の情報、秘密情報、個人情報、契約金額、非公開 URL は追加しないでください。
+この repository は、Obsidian vault として開き、Codex や Claude Code などのエージェントが repository 内の skill に従って更新する前提で作っています。含まれるデータはすべて架空のサンプルで、URL も `example.com` だけを使っています。公開 repository に、実在顧客の情報、秘密情報、個人情報、契約金額、非公開 URL は追加しないでください。
+
+Issue は受け付けます。Pull Request は原則として受け付けていないため、改善提案はまず Issue で相談してください。自社データを扱う場合は fork ではなく、GitHub の template 機能で private repository として作成してください。
 
 ## これは何か
 
@@ -47,7 +49,7 @@ Python 3.10 以上が必要です。Windows では Git Bash から実行して�
 - `.env` や local cache を含めない。
 - MIT license、協力ガイド、セキュリティ方針を含める。
 
-自分の fork を公開する前に、以下を実行してください。
+自分の repository として公開する前に、以下を実行してください。
 
 ```bash
 scripts/memory privacy-scan

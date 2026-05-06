@@ -21,7 +21,7 @@ v1 では、全メンバーが全クライアント・全社内プロジェク�
 - クライアントに見せる前提でないメモ。
 - `inbox/` にある未昇格メモ。
 
-機械チェックは、entity 配下の file が別 client / internal や raw note を直接参照していないかを確認します。文章として安全かどうかは人間確認、PR 差分確認、必須 CI で確認します。
+機械チェックは、entity 配下の file が別 client / internal や raw note を直接参照していないかを確認します。文章として安全かどうかは人間確認、commit 差分確認、GitHub Actions で確認します。
 
 ## 今後の強化
 

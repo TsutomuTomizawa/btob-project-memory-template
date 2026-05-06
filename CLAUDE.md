@@ -24,6 +24,6 @@
 ## 公開テンプレートとしての注意
 
 - 実在顧客、担当者、契約金額、単価、非公開 URL、個人情報、秘密情報を追加しない。
-- 公開 repository に置けない内容は private fork で扱う。
+- 公開 repository に置けない内容は private repository で扱う。
 - `events/` は追記専用。訂正は correction event として追加する。
 - `company/` は通常の save / digest で自動更新しない。

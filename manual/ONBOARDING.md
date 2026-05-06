@@ -106,7 +106,7 @@ push:
 最新化してください。
 ```
 
-通常メンバーは、`main` にいる状態で素の `git push` を使いません。共有するときはエージェントに「プッシュしてください」と依頼し、`scripts/memory publish` の作業ブランチ経由にします。
+通常メンバーは、共有するときはエージェントに「プッシュしてください」と依頼し、`scripts/memory publish` で commit / push します。公開テンプレートでは Pull Request は原則受け付けません。
 
 ## 保存時に起きること
 
@@ -142,16 +142,14 @@ push:
 
 1. 差分を確認する。
 2. `scripts/memory publish "日本語のコミットメッセージ"` を実行する。
-3. `main` 上なら作業ブランチを作る。
+3. 現在の branch で commit を作る。
 4. pre-commit が走る。
 5. commit する。
 6. push する。
-7. GitHub Actions が PR を自動作成する。
-8. `memory-vault-ci` と `memory-role-guard` が走る。
-9. CI が通り、merge conflict がなければ auto-merge される。
-10. `publish` が remote branch の削除を検知し、`sync` 相当で main に戻って最新化する。
+7. GitHub Actions が走る。
+8. 結果を確認する。
 
-コミットメッセージ、PR title、PR body は日本語にします。
+コミットメッセージは日本語にします。
 
 ## よくあるエラー
 
@@ -177,7 +175,7 @@ CI log に値を出さないため、privacy scan は実値を表示せず止ま
 
 ### コンフリクトが起きた
 
-同じ file を複数人が更新すると、`publish` / `sync` や PR の auto-merge が止まることがあります。これは安全に止まっている状態です。
+同じ file を複数人が更新すると、`publish` / `sync` が止まることがあります。これは安全に止まっている状態です。
 
 エージェントに「コンフリクトを解消してください」と依頼してください。エージェントは両方の変更内容を確認し、片方を機械的に捨てず、`profile.md` / `states/current.md` は統合します。既存 event は直接書き換えず、訂正が必要な場合は correction event として残します。
 

@@ -2,14 +2,16 @@
 
 ## デフォルト workflow
 
-- GitHub pull request を使います。
+- 改善提案、質問、バグ報告は GitHub Issue で受けます。
+- Pull Request は原則として受け付けません。必要な場合だけ、事前に Issue で方針を確認して maintainer が判断します。
+- 共有時は `scripts/memory publish` で commit / push し、GitHub Actions の結果を確認します。
 - 1 回の保存または digest batch はレビューしやすい単位にします。
-- 可能な限り、PR では event 追加と派生更新を分けて見えるようにします。
+- 可能な限り、event 追加と派生更新を commit 差分で分けて見えるようにします。
 - Obsidian は閲覧・確認用です。client / internal 配下の `events/` 以外と top-level `raw/` は人間が手動編集できます。保存・digest や event 訂正は、人間の依頼を受けたエージェントが skill 経由で行います。
 
 ## 人間が主に持つ領域
 
-- Obsidian と PR 差分での確認。
+- Obsidian、commit 差分、GitHub Actions 結果の確認。
 - 議事録、メモ、URL、修正依頼の提供。
 - マネジメントが承認した `company/` 方針の提供。
 - クライアント向け draft の review 判断。

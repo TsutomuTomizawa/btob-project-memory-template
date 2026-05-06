@@ -134,17 +134,17 @@ draft はチャット上に出ます。内部懸念、未確定数値、別 clie
 scripts/memory publish "日本語のコミットメッセージ"
 ```
 
-`main` に直接 push せず、作業ブランチを作って commit / push します。push 後に GitHub Actions が PR を自動作成し、CI が通ると auto-merge されます。`publish` は merge 完了を待ち、main に戻して最新化します。
+公開テンプレートでは自動 PR / auto-merge を使わず、maintainer が現在の branch を commit / push します。push 後は GitHub Actions の結果を確認してください。
 
 ```bash
 scripts/memory sync
 ```
 
-待たずに push だけで終える必要がある場合は `scripts/memory publish --no-wait "日本語のコミットメッセージ"` を使い、後で `scripts/memory sync` を実行します。
+別端末で更新した後は、未保存変更がないことを確認して `scripts/memory sync` を実行します。
 
 ## コンフリクトが起きたとき
 
-コンフリクトが起きても、変更が勝手に main へ混ざることはありません。`publish` / `sync` は安全に止まり、PR も auto-merge されません。
+コンフリクトが起きても、`publish` / `sync` は安全に止まります。
 
 止まった場合は、エージェントに「コンフリクトを解消してください」と依頼してください。エージェントは両方の変更内容を確認し、片方を機械的に捨てず、`profile.md` / `states/current.md` は内容を統合します。既存 event の事実や本文は直接書き換えず、必要なら新しい correction event として訂正を残します。解消後は lint と必要なチェックを通してから再度 push します。
 

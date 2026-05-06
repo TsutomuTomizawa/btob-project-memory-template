@@ -16,7 +16,7 @@ CLI が行わないこと:
 - event を分割、要約、digest する。
 - 保存・digest の判断として `clients/`、`internal/`、`inbox/`、`raw/`、`company/` を直接更新する。
 - 例外として、`lint --fix --staged` は staged 済み client / internal 非 event file の機械的な形式補正だけを行う。
-- 例外として、`publish` は既存差分の stage / commit / branch push を行う。memory 内容の判断はしない。
+- 例外として、`publish` は既存差分の stage / commit / push を行う。memory 内容の判断はしない。
 - Codex CLI を自動実行して repository を更新する。
 - `qa-llm` も LLM を自動起動しません。一時 vault とシナリオを作り、Codex / Claude が実際に skill を使った後の結果を検査します。
 
@@ -44,8 +44,6 @@ scripts/memory add --internal sales-template-renewal --name "営業提案テン�
 scripts/memory review --client example-client-alpha --month 2026-05 "5月を総括して保存"
 scripts/memory review --internal sales-template-renewal --month 2026-05 "5月を総括して保存"
 scripts/memory publish "クライアントメモを更新"
-scripts/memory publish --branch codex/client-notes "クライアントメモを更新"
-scripts/memory publish --no-wait "クライアントメモを更新"
 scripts/memory sync
 scripts/memory sync --prune-gone
 scripts/memory privacy-scan
@@ -70,9 +68,9 @@ scripts/memory diff-check
 
 `qa-llm` は、実際の LLM agent が skill を読んで新規作成・保存・digest・月次総括を行えるかを確認するための手動 QA です。`prepare` は `memory-llm-qa-*` の一時 vault と `llm-qa/RUNBOOK.md` を作ります。その runbook を Codex / Claude に渡して一時 vault 内で処理させた後、`check` が raw 保存、薄い event、複数 entity 分割、inbox 退避、手動 current/profile 保持、internal 保存、sources 登録、correction event、digest 不要 event、monthly-review event、client / internal 新規作成、lint 通過を確認します。重いため CI には入れません。
 
-`publish` は、ユーザーが「pushして」と依頼した時の標準入口です。`main` 上に未保存変更がある場合は、`origin/main` から `codex/memory-publish-...` の作業ブランチを作り、変更を戻してから `git add -A`、`git commit`、`git push -u origin <branch>` を実行します。commit 時には `.githooks/pre-commit` と `.githooks/commit-msg` が走り、日本語ではないコミットメッセージを止めます。push 後は GitHub Actions による PR 作成、CI、auto-merge を待ち、remote branch の削除を検知したら `sync` 相当で `main` に戻して最新化します。`main` 以外の branch で実行した場合は、その branch に commit して push し、同じように auto-merge 完了を待ちます。`gh` CLI は不要です。待たずに push だけで終える場合は `--no-wait` を使います。
+`publish` は、ユーザーが「pushして」と依頼した時の標準入口です。現在の branch で `git add -A`、`git commit`、`git push -u origin <branch>` を実行します。commit 時には `.githooks/pre-commit` と `.githooks/commit-msg` が走り、日本語ではないコミットメッセージを止めます。公開テンプレートでは GitHub Actions による PR 自動作成や auto-merge は使いません。push 後は GitHub Actions の結果を確認してください。
 
-`sync` は、PR が merge された後の標準入口です。未保存変更がないことを確認し、`git fetch origin --prune`、`git checkout main`、`git merge --ff-only origin/main` を実行します。現在の `codex/*` 作業ブランチの remote が merge 後に削除済みなら、local branch も削除します。`--prune-gone` を付けると、remote が消えている他の `codex/*` branch もまとめて片付けます。
+`sync` は、未保存変更がないことを確認し、`git fetch origin --prune`、`git checkout main`、`git merge --ff-only origin/main` を実行します。作業 branch を手動で使った場合、remote が削除済みなら local branch も削除します。`--prune-gone` を付けると、remote が消えている `codex/*` branch もまとめて片付けます。
 
 ## Prompt Generation
 

@@ -66,9 +66,9 @@ gws sheets spreadsheets.values get --params '{"spreadsheetId":"SPREADSHEET_ID","
 ```md
 | 名称 | 種別 | URL | context | 備考 |
 | --- | --- | --- | --- | --- |
-| 2026-05 月次レポート | spreadsheet | https://docs.google.com/spreadsheets/d/... | on_demand | 月次レポート作成時だけ読む。 |
-| 提案資料 | slide | https://docs.google.com/presentation/d/... | yes | 打合せ準備で参照する。 |
-| 契約書 | drive_file | https://drive.google.com/file/d/... | no | 所在のみ記録。本文は判断材料にしない。 |
+| 2026-05 月次レポート | spreadsheet | https://example.com/google-workspace/monthly-report | on_demand | 月次レポート作成時だけ読む。 |
+| 提案資料 | slide | https://example.com/google-workspace/proposal-deck | yes | 打合せ準備で参照する。 |
+| 契約書 | drive_file | https://example.com/google-workspace/contract-file | no | 所在のみ記録。本文は判断材料にしない。 |
 ```
 
 `sources.md` に URL がない外部資料を継続的な context として使わないでください。会話中に URL を受け取った場合も、継続利用するなら対象 entity の `sources.md` に登録します。
