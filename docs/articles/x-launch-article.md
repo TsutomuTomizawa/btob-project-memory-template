@@ -133,6 +133,7 @@ https://github.com/TsutomuTomizawa/btob-project-memory-template
 
 X Article に画像を添える場合は、README の以下の図を使う想定です。
 
+- `docs/assets/social/x-thumbnail.svg`: X 投稿のサムネイル
 - `docs/assets/context-challenge.svg`: BtoB でコンテキストが散らばる理由
 - `docs/assets/memory-growth-flow.svg`: データが蓄積して memory が育つ流れ
 
