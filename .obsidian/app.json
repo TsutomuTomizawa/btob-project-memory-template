@@ -1,0 +1,19 @@
+{
+  "userIgnoreFilters": [
+    ".agentic/",
+    ".agents/",
+    ".claude/",
+    ".github/",
+    "docs/",
+    "scripts/",
+    "skills/",
+    "templates/",
+    "tools/",
+    "AGENTS.md",
+    "AgentContract.md",
+    "CLAUDE.md",
+    "Home.md",
+    "Memory.md",
+    "README.md"
+  ]
+}

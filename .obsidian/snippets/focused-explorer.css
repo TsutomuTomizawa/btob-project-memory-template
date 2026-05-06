@@ -1,0 +1,111 @@
+/*
+  Focus the Obsidian file explorer on the files people use day to day.
+  Repository support files stay on disk and remain available to Codex.
+*/
+
+.nav-files-container > div,
+.nav-folder-children {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Root: show only the user-facing work areas. */
+.nav-folder:has(> .nav-folder-title[data-path=".agentic"]),
+.nav-folder:has(> .nav-folder-title[data-path=".agents"]),
+.nav-folder:has(> .nav-folder-title[data-path=".claude"]),
+.nav-folder:has(> .nav-folder-title[data-path=".github"]),
+.nav-folder:has(> .nav-folder-title[data-path=".obsidian"]),
+.nav-folder:has(> .nav-folder-title[data-path="docs"]),
+.nav-folder:has(> .nav-folder-title[data-path="scripts"]),
+.nav-folder:has(> .nav-folder-title[data-path="skills"]),
+.nav-folder:has(> .nav-folder-title[data-path="templates"]),
+.nav-folder:has(> .nav-folder-title[data-path="tools"]),
+.nav-file:has(> .nav-file-title[data-path=".gitignore"]),
+.nav-file:has(> .nav-file-title[data-path="AGENTS.md"]),
+.nav-file:has(> .nav-file-title[data-path="AgentContract.md"]),
+.nav-file:has(> .nav-file-title[data-path="CLAUDE.md"]),
+.nav-file:has(> .nav-file-title[data-path="Home.md"]),
+.nav-file:has(> .nav-file-title[data-path="Memory.md"]),
+.nav-file:has(> .nav-file-title[data-path="README.md"]) {
+  display: none !important;
+}
+
+/* Fallback for environments that load title rows before parent selectors. */
+.nav-folder-title[data-path=".agentic"],
+.nav-folder-title[data-path=".agents"],
+.nav-folder-title[data-path=".claude"],
+.nav-folder-title[data-path=".github"],
+.nav-folder-title[data-path=".obsidian"],
+.nav-folder-title[data-path="docs"],
+.nav-folder-title[data-path="scripts"],
+.nav-folder-title[data-path="skills"],
+.nav-folder-title[data-path="templates"],
+.nav-folder-title[data-path="tools"],
+.nav-file-title[data-path=".gitignore"],
+.nav-file-title[data-path="AGENTS.md"],
+.nav-file-title[data-path="AgentContract.md"],
+.nav-file-title[data-path="CLAUDE.md"],
+.nav-file-title[data-path="Home.md"],
+.nav-file-title[data-path="Memory.md"],
+.nav-file-title[data-path="README.md"] {
+  display: none !important;
+}
+
+/* Root order. */
+.nav-folder:has(> .nav-folder-title[data-path="clients"]) {
+  order: 10;
+}
+
+.nav-folder:has(> .nav-folder-title[data-path="internal"]) {
+  order: 20;
+}
+
+.nav-folder:has(> .nav-folder-title[data-path="company"]) {
+  order: 30;
+}
+
+.nav-folder:has(> .nav-folder-title[data-path="manual"]) {
+  order: 40;
+}
+
+.nav-folder:has(> .nav-folder-title[data-path="inbox"]) {
+  order: 50;
+}
+
+.nav-folder:has(> .nav-folder-title[data-path="raw"]) {
+  order: 60;
+}
+
+.nav-folder:has(> .nav-folder-title[data-path="views"]) {
+  order: 70;
+}
+
+/* Entity folders: current working surfaces first. */
+.nav-folder:has(> .nav-folder-title[data-path$="/states"]) {
+  order: 10;
+}
+
+.nav-file:has(> .nav-file-title[data-path$="/sources.md"]) {
+  order: 20;
+}
+
+.nav-file:has(> .nav-file-title[data-path$="/profile.md"]) {
+  order: 30;
+}
+
+.nav-folder:has(> .nav-folder-title[data-path$="/events"]) {
+  order: 40;
+}
+
+/* Views: dashboards first. */
+.nav-file:has(> .nav-file-title[data-path="views/updates.md"]) {
+  order: 10;
+}
+
+.nav-file:has(> .nav-file-title[data-path="views/tasks.md"]) {
+  order: 20;
+}
+
+.nav-file:has(> .nav-file-title[data-path="views/README.md"]) {
+  order: 90;
+}

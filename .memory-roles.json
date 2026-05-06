@@ -1,0 +1,16 @@
+{
+  "default_role": "member",
+  "default_allowed_roots": [
+    "clients",
+    "internal",
+    "raw",
+    "inbox"
+  ],
+  "members": [
+    {
+      "github": "tsutomutomizawa",
+      "role": "admin",
+      "allowed_roots": []
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MIN_PYTHON_MAJOR=3
+MIN_PYTHON_MINOR=10
+ORIGINAL_ARGS=("$@")
+
+try_python() {
+  local -a candidate=("$@")
+
+  if ! command -v "${candidate[0]}" >/dev/null 2>&1; then
+    return 1
+  fi
+
+  if "${candidate[@]}" - <<'PY' >/dev/null 2>&1; then
+import sys
+raise SystemExit(0 if sys.version_info >= (3, 10) else 1)
+PY
+    exec "${candidate[@]}" "${ORIGINAL_ARGS[@]}"
+  fi
+
+  return 1
+}
+
+try_python python3 || true
+try_python python3.12 || true
+try_python python3.11 || true
+try_python python3.10 || true
+try_python python || true
+try_python py -3 || true
+
+cat >&2 <<'EOF'
+[memory] Python 3.10 以上が見つかりません。
+
+以下のいずれかで Python 3.10 以上を実行できるようにしてから、もう一度実行してください。
+- macOS / Linux: python3
+- Windows Git Bash: python, python3, または py -3
+
+Windows では Git for Windows の Git Bash から実行する運用を標準にします。
+EOF
+exit 127

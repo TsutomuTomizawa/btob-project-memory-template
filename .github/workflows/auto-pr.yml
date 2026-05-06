@@ -1,0 +1,84 @@
+name: Auto PR
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: auto-pr-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  auto-pr-to-main:
+    name: auto-pr-to-main
+    if: ${{ github.event.deleted == false }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Create PR and request auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_PR_TOKEN }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "::notice::AUTO_PR_TOKEN が設定されていないため、自動 PR 作成をスキップします。"
+            exit 0
+          fi
+
+          pr_number="$(gh pr list \
+            --repo "$REPO" \
+            --head "$BRANCH" \
+            --base main \
+            --state open \
+            --json number \
+            --jq '.[0].number // empty')"
+
+          if [[ -z "$pr_number" ]]; then
+            title="$(git log -1 --pretty=%s)"
+            if [[ -z "$title" ]]; then
+              title="${BRANCH} の変更を反映"
+            fi
+
+            body="$(printf '作業ブランチ `%s` から main への自動 PR です。\n\n- 対象コミット: `%s`\n- CI は作業ブランチへの push と main 向け PR で実行されます。\n- リポジトリ設定で許可されている場合は auto-merge を要求します。\n' "$BRANCH" "$SHA")"
+
+            gh pr create \
+              --repo "$REPO" \
+              --base main \
+              --head "$BRANCH" \
+              --title "$title" \
+              --body "$body"
+
+            pr_number="$(gh pr list \
+              --repo "$REPO" \
+              --head "$BRANCH" \
+              --base main \
+              --state open \
+              --json number \
+              --jq '.[0].number // empty')"
+          else
+            echo "${BRANCH} の PR #${pr_number} は既に存在します。"
+          fi
+
+          if [[ -z "$pr_number" ]]; then
+            echo "::error::${BRANCH} の PR を作成または検出できませんでした。"
+            exit 1
+          fi
+
+          if gh pr merge "$pr_number" --repo "$REPO" --auto --squash --delete-branch; then
+            echo "PR #${pr_number} の auto-merge を要求しました。"
+          else
+            echo "::warning::PR #${pr_number} の native auto-merge を有効化できませんでした。チェック確認後、必要に応じて手動で merge してください。"
+          fi

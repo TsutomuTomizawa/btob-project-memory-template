@@ -1,0 +1,70 @@
+name: Memory Role Guard
+
+on:
+  workflow_run:
+    workflows:
+      - Memory CI
+    types:
+      - completed
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  memory-role-guard-status:
+    name: memory-role-guard-status
+    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch != 'main' && github.event.workflow_run.head_repository.full_name == github.repository }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout trusted main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Fetch pushed head
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: git fetch --no-tags origin "$HEAD_SHA"
+
+      - name: Role guard and publish status
+        run: |
+          set -euo pipefail
+
+          context="memory-role-guard"
+          base="$(git merge-base origin/main "$HEAD_SHA")"
+          gh api --method POST "repos/${REPO}/statuses/${HEAD_SHA}" \
+            -f state=pending \
+            -f context="$context" \
+            -f description="Checking actor role against changed paths" \
+            -f target_url="$RUN_URL" >/dev/null
+
+          set +e
+          output="$(scripts/memory role-guard --ci --actor "$MEMORY_CI_ACTOR" --base "$base" --head "$HEAD_SHA" 2>&1)"
+          rc=$?
+          set -e
+          printf '%s\n' "$output"
+
+          if [[ "$rc" -eq 0 ]]; then
+            state=success
+            description="Actor role allows these changed paths"
+          else
+            state=failure
+            description="Actor role does not allow these changed paths"
+          fi
+
+          gh api --method POST "repos/${REPO}/statuses/${HEAD_SHA}" \
+            -f state="$state" \
+            -f context="$context" \
+            -f description="$description" \
+            -f target_url="$RUN_URL" >/dev/null
+
+          exit "$rc"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          MEMORY_CI_ACTOR: ${{ github.event.workflow_run.actor.login }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

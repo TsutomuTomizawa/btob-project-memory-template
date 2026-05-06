@@ -1,0 +1,90 @@
+name: Memory CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - "**"
+
+permissions:
+  contents: read
+
+jobs:
+  memory-vault-ci:
+    name: memory-vault-ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Japanese commit and PR text
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          PR_TITLE: ${{ github.event.pull_request.title || '' }}
+          PR_BODY: ${{ github.event.pull_request.body || '' }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${BASE_SHA}" || "${BASE_SHA}" =~ ^0+$ ]] || ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            BASE_SHA="$(git merge-base origin/main HEAD 2>/dev/null || git rev-parse HEAD^)"
+          fi
+
+          scripts/memory commit-language --base "$BASE_SHA" --head HEAD
+
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            python3 - <<'PY'
+          import os
+          import re
+          import sys
+
+          pattern = re.compile(r"[\u3040-\u30ff\u3400-\u9fff]")
+          checks = [
+              ("PR タイトル", os.environ.get("PR_TITLE", "")),
+              ("PR 本文", os.environ.get("PR_BODY", "")),
+          ]
+          failures = [label for label, value in checks if not pattern.search(value or "")]
+          if failures:
+              print("[memory] PR のタイトルと本文は日本語で作成してください。", file=sys.stderr)
+              for label in failures:
+                  print(f"- {label}", file=sys.stderr)
+              sys.exit(1)
+          PY
+          fi
+
+      - name: Python syntax check
+        run: scripts/memory py-compile
+
+      - name: Privacy scan
+        run: scripts/memory privacy-scan
+
+      - name: Memory lint
+        run: scripts/memory lint
+
+      - name: Memory smoke
+        run: scripts/memory smoke
+
+      - name: Diff whitespace check
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${BASE_SHA}" || "${BASE_SHA}" =~ ^0+$ ]] || ! git cat-file -e "${BASE_SHA}^{commit}" 2>/dev/null; then
+            BASE_SHA="$(git merge-base origin/main HEAD 2>/dev/null || git rev-parse HEAD^)"
+          fi
+
+          if [[ "${EVENT_NAME}" == "pull_request" ]]; then
+            git diff --check "${BASE_SHA}...HEAD"
+          else
+            git diff --check "${BASE_SHA}..HEAD"
+          fi

@@ -1,0 +1,25 @@
+.DS_Store
+.obsidian/workspace*.json
+.obsidian/cache/
+.obsidian/plugins/
+.trash/
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+__pycache__/
+*.pyc
+.memory-cache/
+.memory-audit/
+.memory-local.json
+
+# 旧 raw 置き場。新しい原本は top-level raw/ に置く
+.raw/
+
+# 対象未確定の一時メモは local triage として扱う
+inbox/*
+!inbox/README.md
+
+# 廃止済み personal 領域の誤追加防止
+personal/

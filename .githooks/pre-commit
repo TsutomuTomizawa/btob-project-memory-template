@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+staged_files="$(git diff --cached --name-only)"
+
+has_staged_path() {
+  pattern="$1"
+  printf '%s\n' "$staged_files" | grep -Eq "$pattern"
+}
+
+echo "[memory] pre-commit: staged diff whitespace check"
+scripts/memory diff-check
+
+echo "[memory] pre-commit: staged privacy scan"
+scripts/memory privacy-scan --staged
+
+echo "[memory] pre-commit: role guard"
+scripts/memory role-guard --staged
+
+if has_staged_path '^(tools/.*\.py|scripts/memory)$'; then
+  echo "[memory] pre-commit: Python syntax check"
+  scripts/memory py-compile
+else
+  echo "[memory] pre-commit: skip Python syntax check (no staged Python tool changes)"
+fi
+
+if has_staged_path '^(clients/[^/]+/.*\.md|internal/[^/]+/.*\.md|raw/.*\.md)$'; then
+  echo "[memory] pre-commit: staged memory lint/fix"
+  scripts/memory lint --fix --staged
+else
+  echo "[memory] pre-commit: skip staged memory lint/fix (no staged client/internal markdown, raw note, or event changes)"
+fi
+
+echo "[memory] pre-commit: ok"

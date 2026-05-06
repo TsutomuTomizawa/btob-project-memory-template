@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$repo_root"
+
+message_file="${1:-}"
+
+if [[ -z "$message_file" || ! -f "$message_file" ]]; then
+  echo "[memory] commit-msg: コミットメッセージファイルが見つかりません。" >&2
+  exit 1
+fi
+
+"${BASH:-bash}" scripts/memory-python - "$message_file" <<'PY'
+from pathlib import Path
+import re
+import sys
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8", errors="replace")
+subject = ""
+
+for line in text.splitlines():
+    stripped = line.strip()
+    if not stripped or stripped.startswith("#"):
+        continue
+    subject = stripped
+    break
+
+if not subject:
+    print("[memory] commit-msg: コミットメッセージが空です。", file=sys.stderr)
+    sys.exit(1)
+
+if not re.search(r"[\u3040-\u30ff\u3400-\u9fff]", subject):
+    print("[memory] commit-msg: コミットメッセージは日本語で作成してください。", file=sys.stderr)
+    print('[memory] commit-msg: 例: "導入手順を更新"', file=sys.stderr)
+    sys.exit(1)
+PY
+
+echo "[memory] commit-msg: ok"

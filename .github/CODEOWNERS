@@ -1,0 +1,32 @@
+# Repository maintenance owners.
+#
+# CODEOWNERS marks repository maintenance ownership for schema, skills, tools,
+# docs, hooks, templates, company policy, and shared generated views.
+# Replace @tsutomutomizawa with your organization or maintainer accounts in forks.
+
+/.agentic/ @tsutomutomizawa
+/.github/ @tsutomutomizawa
+/.githooks/ @tsutomutomizawa
+/.obsidian/ @tsutomutomizawa
+/raw/ @tsutomutomizawa
+/company/ @tsutomutomizawa
+/docs/ @tsutomutomizawa
+/manual/ @tsutomutomizawa
+/scripts/ @tsutomutomizawa
+/skills/ @tsutomutomizawa
+/templates/ @tsutomutomizawa
+/tools/ @tsutomutomizawa
+/views/ @tsutomutomizawa
+
+/.gitignore @tsutomutomizawa
+/.memory-roles.json @tsutomutomizawa
+/.memory-local.example.json @tsutomutomizawa
+/AGENTS.md @tsutomutomizawa
+/AgentContract.md @tsutomutomizawa
+/CLAUDE.md @tsutomutomizawa
+/Memory.md @tsutomutomizawa
+/README.md @tsutomutomizawa
+/CONTRIBUTING.md @tsutomutomizawa
+/LICENSE @tsutomutomizawa
+/SECURITY.md @tsutomutomizawa
+/inbox/README.md @tsutomutomizawa
