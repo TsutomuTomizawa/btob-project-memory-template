@@ -55,6 +55,7 @@ main への push では GitHub Actions が `scripts/memory commit-language`、`s
 - Maintainer 以外に write 権限を付けない。
 - `main` は maintainer が直接更新してよいが、push 前に `scripts/memory privacy-scan`、`scripts/memory lint`、必要に応じて `scripts/memory smoke` を実行する。
 - 外部 contribution はまず Issue で受け、PR 取り込みは例外扱いにする。
+- 例外的に PR を取り込む場合も auto-merge は使わず、merge 方法は squash merge に寄せる。
 - CODEOWNERS は責任範囲を示す目印として残すが、GitHub 上の必須 review 条件にはしない。
 - 自動 PR 作成用の repository secret は設定しない。
 
