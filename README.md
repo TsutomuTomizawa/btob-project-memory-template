@@ -38,25 +38,6 @@ Python 3.10 以上が必要です。Windows では Git Bash から実行して�
 6. `memory-output` が顧客向け共有文や提案文をチャット上で draft として作る。output file は repository に保存しない。
 7. `scripts/memory lint` と `scripts/memory smoke` で vault の健全性を確認する。
 
-## 公開 repository としての安全性
-
-このテンプレートは、公開用に履歴を切り離した clean history の repository として作っています。
-
-- 元の private repository の git 履歴を含めない。
-- 実在顧客や社内プロジェクトのデータを含めない。
-- 実在の連絡先を含めない。
-- 非公開の Google Workspace URL を含めない。
-- `.env` や local cache を含めない。
-- MIT license、協力ガイド、セキュリティ方針を含める。
-
-自分の repository として公開する前に、以下を実行してください。
-
-```bash
-scripts/memory privacy-scan
-scripts/memory lint
-scripts/memory smoke
-```
-
 ## 含まれるサンプル
 
 - `clients/sample-saas-platform`: BtoB SaaS の更新商談と部門展開のサンプル。
